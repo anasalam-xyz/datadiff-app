@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 
@@ -16,9 +16,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setItems((xs) => [...xs, { id, kind, message }]);
     setTimeout(() => setItems((xs) => xs.filter((x) => x.id !== id)), 3500);
   }, []);
+  const value = useMemo(() => ({ push }), [push]);
 
   return (
-    <Ctx.Provider value={{ push }}>
+    <Ctx.Provider value={value}>
       {children}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 items-end">
         <AnimatePresence>
@@ -50,9 +51,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export function useToast() {
   const c = useContext(Ctx);
   if (!c) throw new Error("useToast must be used inside <ToastProvider>");
-  return {
-    success: (m: string) => c.push("success", m),
-    error: (m: string) => c.push("error", m),
-    info: (m: string) => c.push("info", m),
-  };
+  const success = useCallback((m: string) => c.push("success", m), [c]);
+  const error = useCallback((m: string) => c.push("error", m), [c]);
+  const info = useCallback((m: string) => c.push("info", m), [c]);
+  return useMemo(() => ({ success, error, info }), [success, error, info]);
 }

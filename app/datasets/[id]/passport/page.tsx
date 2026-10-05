@@ -83,19 +83,19 @@ function PassportTimeline() {
   // Detect new entries arriving live from Python SDK
   useEffect(() => {
     if (!passportQuery.data) return;
-    if (knownEntryIds.current.size > 0) {
-      const newIds = passportQuery.data
-        .filter((e) => !knownEntryIds.current.has(e.id))
-        .map((e) => e.id);
-
-      if (newIds.length > 0) {
-        setRecentEntryIds(new Set(newIds));
-        toast.info(`${newIds.length} new passport entry added`);
-        const timer = setTimeout(() => setRecentEntryIds(new Set()), 3000);
-        return () => clearTimeout(timer);
-      }
-    }
+    const newIds = knownEntryIds.current.size === 0
+      ? []
+      : passportQuery.data
+          .filter((entry) => !knownEntryIds.current.has(entry.id))
+          .map((entry) => entry.id);
     knownEntryIds.current = new Set(passportQuery.data.map((e) => e.id));
+
+    if (newIds.length > 0) {
+      setRecentEntryIds(new Set(newIds));
+      toast.info(`${newIds.length} new passport entry added`);
+      const timer = setTimeout(() => setRecentEntryIds(new Set()), 3000);
+      return () => clearTimeout(timer);
+    }
   }, [passportQuery.data, toast]);
 
   // Verify mutation
