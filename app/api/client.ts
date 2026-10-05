@@ -1,6 +1,8 @@
 import createClient from "openapi-fetch";
 import type { paths } from "./schema";
 
+export const apiHeaders = { "x-api-key": process.env.NEXT_PUBLIC_API_KEY! };
+
 export const api = createClient<paths>({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY!, "X-Actor": "web-ui" },

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { useToast } from "./Toast";
 
 interface HashChipProps {
@@ -19,19 +19,24 @@ export default function HashChip({
   const [copied, setCopied] = useState(false);
   const toast = useToast();
 
-  if (!hash) return <span className="text-mute font-mono text-xs">–</span>;
+  if (!hash) return <span className="text-mute font-mono text-xs">-</span>;
 
   const short = hash.length > length + 4
-    ? `${hash.slice(0, length)}…${hash.slice(-4)}`
+    ? `${hash.slice(0, length)}...${hash.slice(-4)}`
     : hash.slice(0, length);
 
-  const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    navigator.clipboard.writeText(hash);
-    setCopied(true);
-    toast.info("Hash copied to clipboard");
-    setTimeout(() => setCopied(false), 1500);
+  const handleCopy = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    try {
+      await navigator.clipboard.writeText(hash);
+      setCopied(true);
+      toast.info("Hash copied to clipboard");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Could not copy hash to clipboard");
+    }
   };
 
   return (

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import Modal from "./Modal";
 import { useToast } from "./Toast";
-import { api, ApiError, errMsg, unwrap } from "@/app/api/client";
+import { api, apiHeaders, ApiError, errMsg, unwrap } from "@/app/api/client";
 import { qk } from "@/app/api/keys";
 import type { Dataset } from "@/app/api/types";
 
@@ -50,6 +50,7 @@ export default function NewDatasetModal({ isOpen, onClose }: NewDatasetModalProp
 
       return unwrap<Dataset>(
         await api.POST("/api/v1/datasets", {
+          params: { header: apiHeaders },
           body: {
             name: name.trim(),
             description: description.trim() || null,

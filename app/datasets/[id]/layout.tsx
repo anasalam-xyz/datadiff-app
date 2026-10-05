@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import type { ReactNode } from "react";
-import { api, errMsg, unwrap } from "@/app/api/client";
+import { api, apiHeaders, errMsg, unwrap } from "@/app/api/client";
 import { qk } from "@/app/api/keys";
 import type { Dataset, Version } from "@/app/api/types";
 import IntegrityBadge, { IntegrityProvider } from "@/components/IntegrityBadge";
@@ -20,12 +20,12 @@ function DatasetShell({ id, children }: { id: number; children: ReactNode }) {
   const ds = useQuery({
     queryKey: qk.dataset(id),
     queryFn: async () =>
-      unwrap<Dataset>(await api.GET("/api/v1/datasets/{dataset_id}", { params: { path: { dataset_id: id } } })),
+      unwrap<Dataset>(await api.GET("/api/v1/datasets/{dataset_id}", { params: { path: { dataset_id: id }, header: apiHeaders } })),
   });
   const vs = useQuery({
     queryKey: qk.versions(id),
     queryFn: async () =>
-      unwrap<Version[]>(await api.GET("/api/v1/datasets/{dataset_id}/versions", { params: { path: { dataset_id: id } } })),
+      unwrap<Version[]>(await api.GET("/api/v1/datasets/{dataset_id}/versions", { params: { path: { dataset_id: id }, header: apiHeaders } })),
   });
   const d = ds.data;
   const latest = vs.data?.at(-1)?.version_no;

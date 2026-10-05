@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Calendar, Database, KeyRound, Layers } from "lucide-react";
-import { api, unwrap } from "@/app/api/client";
+import { ArrowRight, Calendar, KeyRound } from "lucide-react";
+import { api, apiHeaders, unwrap } from "@/app/api/client";
 import { qk } from "@/app/api/keys";
 import type { Dataset, Version } from "@/app/api/types";
 
@@ -12,7 +12,7 @@ export default function DatasetCard({ dataset }: { dataset: Dataset }) {
     queryFn: async () =>
       unwrap<Version[]>(
         await api.GET("/api/v1/datasets/{dataset_id}/versions", {
-          params: { path: { dataset_id: dataset.id } },
+          params: { path: { dataset_id: dataset.id }, header: apiHeaders },
         })
       ),
   });
