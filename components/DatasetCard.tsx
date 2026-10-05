@@ -12,7 +12,7 @@ export default function DatasetCard({ dataset }: { dataset: Dataset }) {
     queryFn: async () =>
       unwrap<Version[]>(
         await api.GET("/api/v1/datasets/{dataset_id}/versions", {
-          params: { path: { dataset_id: dataset.id }, header: apiHeaders },
+          params: { path: { dataset_id: dataset.id }, header: apiHeaders() },
         })
       ),
   });

@@ -40,7 +40,7 @@
   --radius-control: 0.625rem;     /* 10px buttons, inputs, icon tiles */
 
   /* layout (usable as w-sidebar, max-w-frame, gap-gutter ...) */
-  --spacing-sidebar: 5rem;
+  --spacing-sidebar: 4rem;
   --spacing-gutter: 1.25rem;
   --container-frame: 80rem;
 
@@ -95,17 +95,20 @@
 @layer components {
   /* the white floating frame + black rounded sidebar */
   .app-frame {
-    @apply bg-surface rounded-frame shadow-frame mx-auto max-w-frame p-4 flex gap-gutter;
-    min-height: calc(100vh - 4rem);
+    @apply bg-surface rounded-frame shadow-frame mx-auto max-w-frame h-full min-h-0 p-2 flex gap-gutter overflow-hidden;
   }
   .sidebar {
-    @apply bg-ink rounded-shell w-sidebar shrink-0 flex flex-col items-center py-7 gap-3;
+    @apply bg-ink rounded-2xl w-sidebar h-full shrink-0 flex flex-col items-center py-2 gap-3 overflow-visible;
   }
   .nav-icon {
-    @apply grid place-items-center size-11 rounded-control text-white/55 transition-colors duration-200;
+    @apply grid place-items-center size-10 rounded-control text-white/55 transition-colors duration-200;
   }
   .nav-icon:hover { @apply text-white; }
   .nav-icon[data-active="true"] { @apply bg-white text-ink; }
+  .sidebar-tooltip {
+    @apply pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 whitespace-nowrap rounded-control bg-ink px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-tip transition-opacity;
+  }
+  .group:hover .sidebar-tooltip { opacity: 1; }
 
   /* cards and list rows */
   .card { @apply bg-card rounded-card; }

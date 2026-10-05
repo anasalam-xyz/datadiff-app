@@ -76,7 +76,7 @@ export default function LogTransformationModal({
     mutationFn: async (parsedParams: Record<string, unknown>) => {
       return unwrap<Transformation>(
         await api.POST("/api/v1/datasets/{dataset_id}/transformations", {
-          params: { path: { dataset_id: datasetId }, header: apiHeaders },
+          params: { path: { dataset_id: datasetId }, header: apiHeaders() },
           body: {
             type,
             params: parsedParams,

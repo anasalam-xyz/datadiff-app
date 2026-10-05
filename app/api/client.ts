@@ -1,11 +1,35 @@
 import createClient from "openapi-fetch";
 import type { paths } from "./schema";
 
-export const apiHeaders = { "x-api-key": process.env.NEXT_PUBLIC_API_KEY! };
+const ACTOR_STORAGE_KEY = "datadiff-actor";
+
+export function getActorName() {
+  if (typeof window === "undefined") return "";
+  const storedName = window.localStorage.getItem(ACTOR_STORAGE_KEY)?.trim() ?? "";
+  return storedName === "web-ui" ? "" : storedName;
+}
+
+export function getActorHeaderName() {
+  return getActorName() || "anonymous";
+}
+
+export function saveActorName(name: string) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(ACTOR_STORAGE_KEY, name.trim());
+    window.dispatchEvent(new Event("datadiff-actor-change"));
+  }
+}
+
+export function apiHeaders() {
+  return {
+    "x-api-key": process.env.NEXT_PUBLIC_API_KEY!,
+    "x-actor": getActorHeaderName(),
+  };
+}
 
 export const api = createClient<paths>({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
-  headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY!, "X-Actor": "web-ui" },
+  headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY! },
 });
 
 export class ApiError extends Error {

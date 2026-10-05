@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { UploadCloud, File, AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "./Toast";
+import { getActorHeaderName } from "@/app/api/client";
 import type { Version } from "@/app/api/types";
 
 interface FileDropzoneProps {
@@ -74,7 +75,7 @@ export default function FileDropzone({ datasetId, onUploaded }: FileDropzoneProp
         method: "POST",
         headers: {
           "X-API-Key": apiKey,
-          "X-Actor": "web-ui",
+          "X-Actor": getActorHeaderName(),
         },
         body: formData,
       });

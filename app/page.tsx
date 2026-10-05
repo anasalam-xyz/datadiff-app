@@ -19,7 +19,7 @@ export default function Home() {
 
   const datasetsQuery = useQuery({
     queryKey: qk.datasets,
-    queryFn: async () => unwrap<Dataset[]>(await api.GET("/api/v1/datasets", { params: { header: apiHeaders } })),
+    queryFn: async () => unwrap<Dataset[]>(await api.GET("/api/v1/datasets", { params: { header: apiHeaders() } })),
   });
 
   const datasets = datasetsQuery.data ?? [];
@@ -31,7 +31,7 @@ export default function Home() {
       queryFn: async () =>
         unwrap<Version[]>(
           await api.GET("/api/v1/datasets/{dataset_id}/versions", {
-            params: { path: { dataset_id: d.id }, header: apiHeaders },
+            params: { path: { dataset_id: d.id }, header: apiHeaders() },
           })
         ),
     })),

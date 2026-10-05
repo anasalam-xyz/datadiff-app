@@ -25,7 +25,7 @@ function CompareContent() {
     queryFn: async () =>
       unwrap<Version[]>(
         await api.GET("/api/v1/datasets/{dataset_id}/versions", {
-          params: { path: { dataset_id: id }, header: apiHeaders },
+          params: { path: { dataset_id: id }, header: apiHeaders() },
         })
       ),
   });
@@ -68,7 +68,7 @@ function CompareContent() {
         await api.GET("/api/v1/datasets/{dataset_id}/diff", {
           params: {
             path: { dataset_id: id },
-            header: apiHeaders,
+            header: apiHeaders(),
             query: {
               from: fromVersion,
               to: toVersion,

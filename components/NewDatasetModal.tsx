@@ -50,7 +50,7 @@ export default function NewDatasetModal({ isOpen, onClose }: NewDatasetModalProp
 
       return unwrap<Dataset>(
         await api.POST("/api/v1/datasets", {
-          params: { header: apiHeaders },
+          params: { header: apiHeaders() },
           body: {
             name: name.trim(),
             description: description.trim() || null,

@@ -44,7 +44,7 @@ export default function VersionsPage() {
     queryFn: async () =>
       unwrap<Version[]>(
         await api.GET("/api/v1/datasets/{dataset_id}/versions", {
-          params: { path: { dataset_id: id }, header: apiHeaders },
+          params: { path: { dataset_id: id }, header: apiHeaders() },
         })
       ),
   });
@@ -55,7 +55,7 @@ export default function VersionsPage() {
     queryFn: async () =>
       unwrap<Transformation[]>(
         await api.GET("/api/v1/datasets/{dataset_id}/transformations", {
-          params: { path: { dataset_id: id }, header: apiHeaders },
+          params: { path: { dataset_id: id }, header: apiHeaders() },
         })
       ),
   });
@@ -72,7 +72,7 @@ export default function VersionsPage() {
               dataset_id: id,
               version_no: activeVersionForDrawer.version_no,
             },
-            header: apiHeaders,
+            header: apiHeaders(),
             query: { limit: 50 },
           },
         })

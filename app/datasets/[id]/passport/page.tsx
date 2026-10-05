@@ -13,7 +13,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import { api, apiHeaders, errMsg, unwrap } from "@/app/api/client";
+import { api, apiHeaders, errMsg, getActorHeaderName, unwrap } from "@/app/api/client";
 import { qk } from "@/app/api/keys";
 import type { Entry, VerifyResult } from "@/app/api/types";
 import { useIntegrity } from "@/components/IntegrityBadge";
@@ -54,6 +54,7 @@ function PassportTimeline() {
   const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null);
   const [verifyTimestamp, setVerifyTimestamp] = useState<Date | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const verifyRequestHandled = useRef(false);
 
   // Track newly arrived entries for live update highlight
   const knownEntryIds = useRef<Set<number>>(new Set());
@@ -68,7 +69,7 @@ function PassportTimeline() {
         await api.GET("/api/v1/datasets/{dataset_id}/passport", {
           params: {
             path: { dataset_id: id },
-            header: apiHeaders,
+            header: apiHeaders(),
             query: { type: typeParam },
           },
         })
@@ -102,7 +103,7 @@ function PassportTimeline() {
     mutationFn: async () => {
       return unwrap<VerifyResult>(
         await api.POST("/api/v1/datasets/{dataset_id}/passport/verify", {
-          params: { path: { dataset_id: id }, header: apiHeaders },
+          params: { path: { dataset_id: id }, header: apiHeaders() },
         })
       );
     },
@@ -120,6 +121,22 @@ function PassportTimeline() {
       toast.error(errMsg(err));
     },
   });
+  const { mutate: runVerify } = verifyMutation;
+
+  useEffect(() => {
+    if (searchParams.get("verify") !== "1") {
+      verifyRequestHandled.current = false;
+      return;
+    }
+    if (verifyRequestHandled.current) return;
+
+    verifyRequestHandled.current = true;
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("verify");
+    const query = nextParams.toString();
+    router.replace(`/datasets/${id}/passport${query ? `?${query}` : ""}`);
+    runVerify();
+  }, [id, router, searchParams, runVerify]);
 
   // Export JSON handler with API key header
   const handleExport = async () => {
@@ -134,7 +151,7 @@ function PassportTimeline() {
       const res = await fetch(`${baseUrl}/api/v1/datasets/${id}/passport/export`, {
         headers: {
           "X-API-Key": apiKey,
-          "X-Actor": "web-ui",
+          "X-Actor": getActorHeaderName(),
         },
       });
 
