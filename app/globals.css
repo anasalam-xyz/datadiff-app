@@ -1,26 +1,189 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ------------------------------------------------------------------
+   Design tokens, extracted from the reference dashboard.
+   Monochrome: black is the accent. Colour appears only where it carries
+   meaning (added / deleted / modified / valid / tampered).
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+   Fonts: load with next/font in app/layout.tsx and expose the CSS vars
+     Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] })
+     JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] })
+   then put both `.variable` classes on <html>.
+------------------------------------------------------------------- */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  /* surfaces */
+  --color-canvas: #f2f2f3;        /* page background behind the frame */
+  --color-surface: #ffffff;       /* the big floating frame */
+  --color-card: #f5f5f6;          /* soft gray cards, rows, inputs */
+  --color-card-hover: #eeeef0;
+  --color-line: #e8e8ea;          /* hairlines, chip borders */
+
+  /* ink */
+  --color-ink: #0a0a0a;           /* sidebar, buttons, headings */
+  --color-ink-soft: #232326;      /* button hover */
+  --color-subtle: #6b6b72;        /* readable secondary text */
+  --color-mute: #9c9ca3;          /* inactive tabs, captions, placeholders */
+
+  /* semantic (diff + integrity only) */
+  --color-ok: #15803d;
+  --color-ok-soft: #e7f5ec;
+  --color-bad: #dc2626;
+  --color-bad-soft: #fdecec;
+  --color-warn: #b45309;
+  --color-warn-soft: #fdf3dc;
+
+  /* radii: frame > sidebar > card > control */
+  --radius-frame: 1.75rem;        /* 28px */
+  --radius-shell: 1.5rem;         /* 24px sidebar */
+  --radius-card: 1.125rem;        /* 18px cards and rows */
+  --radius-control: 0.625rem;     /* 10px buttons, inputs, icon tiles */
+
+  /* layout (usable as w-sidebar, max-w-frame, gap-gutter ...) */
+  --spacing-sidebar: 5rem;
+  --spacing-gutter: 1.25rem;
+  --container-frame: 80rem;
+
+  /* shadows */
+  --shadow-frame: 0 40px 80px -32px rgb(0 0 0 / 0.20), 0 0 0 1px rgb(0 0 0 / 0.03);
+  --shadow-float: 0 18px 36px -14px rgb(0 0 0 / 0.18);  /* the lifted row at the bottom of the list */
+  --shadow-tip: 0 6px 14px -4px rgb(0 0 0 / 0.20);      /* chart tooltips / hash popovers */
+
+  /* motion */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-flash: flash 1.8s var(--ease-soft) 1;
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+  @keyframes flash {
+    from { background-color: rgb(10 10 10 / 0.08); }
+    to   { background-color: transparent; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* fonts reference next/font variables, so `inline` is required */
+@theme inline {
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ------------------------------ base ------------------------------ */
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    min-height: 100vh;
+  }
+  ::selection { background: var(--color-ink); color: #fff; }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+  ::placeholder { color: var(--color-mute); }
+  * { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; }
+  table { border-collapse: separate; border-spacing: 0; }
+}
+
+/* ---------------------------- components --------------------------- */
+@layer components {
+  /* the white floating frame + black rounded sidebar */
+  .app-frame {
+    @apply bg-surface rounded-frame shadow-frame mx-auto max-w-frame p-4 flex gap-gutter;
+    min-height: calc(100vh - 4rem);
+  }
+  .sidebar {
+    @apply bg-ink rounded-shell w-sidebar shrink-0 flex flex-col items-center py-7 gap-3;
+  }
+  .nav-icon {
+    @apply grid place-items-center size-11 rounded-control text-white/55 transition-colors duration-200;
+  }
+  .nav-icon:hover { @apply text-white; }
+  .nav-icon[data-active="true"] { @apply bg-white text-ink; }
+
+  /* cards and list rows */
+  .card { @apply bg-card rounded-card; }
+  .card-row { @apply bg-card rounded-card px-4 py-3 flex items-center gap-4 transition-shadow duration-300; }
+  .card-row:hover { @apply shadow-float; }
+
+  /* buttons: 10px radius rectangles, black solid or white ghost */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-control px-5 py-2.5
+           text-sm font-semibold transition-colors duration-200 disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-solid { @apply bg-ink text-white; }
+  .btn-solid:hover { background: var(--color-ink-soft); }
+  .btn-ghost { @apply bg-surface text-ink border border-line; }
+  .btn-ghost:hover { @apply bg-card; }
+  .btn-sm { @apply px-3.5 py-1.5 text-xs; }
+
+  /* tabs: text only, active = black + bold, inactive = muted (as in the reference) */
+  .tab { @apply text-sm font-medium text-mute transition-colors duration-200 pb-1; }
+  .tab:hover { @apply text-subtle; }
+  .tab[data-active="true"] { @apply text-ink font-bold; }
+
+  /* inputs: gray fill, no border, like the search field */
+  .input {
+    @apply w-full bg-card rounded-control px-4 py-2.5 text-sm text-ink outline-none
+           border border-transparent transition-colors duration-200;
+  }
+  .input:focus { @apply bg-surface border-ink; }
+
+  /* chips */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-surface border border-line
+           px-2.5 py-0.5 text-xs font-medium text-ink;
+  }
+  .hash-chip {
+    @apply font-mono text-[11px] bg-surface border border-line rounded-control px-2 py-1
+           cursor-pointer transition-colors duration-150;
+  }
+  .hash-chip:hover { @apply border-ink; }
+
+  /* semantic pills */
+  .pill-ok   { @apply bg-ok-soft text-ok rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .pill-bad  { @apply bg-bad-soft text-bad rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .pill-warn { @apply bg-warn-soft text-warn rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+
+  /* diff rows: tinted with a 3px left rule */
+  .diff-added    { background: var(--color-ok-soft);   box-shadow: inset 3px 0 0 var(--color-ok); }
+  .diff-deleted  { background: var(--color-bad-soft);  box-shadow: inset 3px 0 0 var(--color-bad); }
+  .diff-modified { background: var(--color-warn-soft); box-shadow: inset 3px 0 0 var(--color-warn); }
+
+  /* skeleton block */
+  .skeleton {
+    @apply rounded-control animate-shimmer;
+    background: linear-gradient(90deg, #efeff1 25%, #f8f8f9 50%, #efeff1 75%);
+    background-size: 200% 100%;
+  }
+}
+
+/* ---------------------------- utilities ---------------------------- */
+@utility num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+@utility stat-xl {            /* big stat numerals like "11" and "4" in the reference */
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+@utility null-cell {           /* renders "∅" for missing diff values */
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
